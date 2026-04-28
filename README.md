@@ -1,8 +1,8 @@
-# Tinnova Veiculos API
+# Tinnova Veículos API
 
-API REST para gerenciamento de veiculos desenvolvida com FastAPI.
+API REST para gerenciamento de veículos desenvolvida com FastAPI.
 
-O projeto foi estruturado como parte de um desafio tecnico, com foco em organizacao de camadas, autenticacao JWT, controle de perfis, persistencia com SQLAlchemy, cache de cotacao do dolar com Redis e testes automatizados.
+O projeto foi estruturado como parte de um desafio técnico, com foco em organização de camadas, autenticação JWT, controle de perfis, persistência com SQLAlchemy, cache de cotação do dólar com Redis e testes automatizados.
 
 ## Tecnologias
 
@@ -18,17 +18,17 @@ O projeto foi estruturado como parte de um desafio tecnico, com foco em organiza
 
 ## Funcionalidades
 
-- Autenticacao com JWT
+- Autenticação com JWT
 - Perfis `USER` e `ADMIN`
-- CRUD de veiculos
-- Soft delete de veiculos
-- Filtros por marca, ano, cor e faixa de preco
-- Conversao de preco recebido em BRL para USD no cadastro
-- Cache Redis para cotacao USD/BRL
-- Relatorio de veiculos ativos por marca
+- CRUD de veículos
+- Soft delete de veículos
+- Filtros por marca, ano, cor e faixa de preço
+- Conversão de preço recebido em BRL para USD no cadastro
+- Cache Redis para cotação USD/BRL
+- Relatório de veículos ativos por marca
 - Tratamento global padronizado de erros
-- Documentacao Swagger/OpenAPI
-- Testes automatizados de services, controllers e fluxo de integracao
+- Documentação Swagger/OpenAPI
+- Testes automatizados de services, controllers e fluxo de integração
 
 ## Como Rodar Localmente
 
@@ -44,7 +44,7 @@ No Windows:
 .venv\Scripts\activate
 ```
 
-Instale as dependencias:
+Instale as dependências:
 
 ```bash
 python -m pip install -r requirements.txt
@@ -68,7 +68,7 @@ Acesse:
 http://127.0.0.1:8000
 ```
 
-Documentacao Swagger:
+Documentação Swagger:
 
 ```text
 http://127.0.0.1:8000/docs
@@ -80,9 +80,9 @@ Health check:
 GET /health
 ```
 
-## Variaveis de Ambiente
+## Variáveis de Ambiente
 
-Principais variaveis:
+Principais variáveis:
 
 ```env
 PROJECT_NAME="Vehicle Management API"
@@ -95,11 +95,11 @@ USD_CACHE_KEY="usd_brl_rate"
 USD_CACHE_TTL_SECONDS=3600
 ```
 
-Por padrao, o projeto usa SQLite local em `app.db`.
+Por padrão, o projeto usa SQLite local em `app.db`.
 
 ## Redis com Docker
 
-O Redis e usado para cachear a cotacao USD/BRL durante o cadastro de veiculos.
+O Redis é usado para cachear a cotação USD/BRL durante o cadastro de veículos.
 
 Suba o Redis com:
 
@@ -107,7 +107,7 @@ Suba o Redis com:
 docker compose up -d redis
 ```
 
-Se o Redis estiver indisponivel, a API continua funcionando. Nesse caso, a cotacao sera buscada diretamente nas APIs externas configuradas.
+Se o Redis estiver indisponível, a API continua funcionando. Nesse caso, a cotação será buscada diretamente nas APIs externas configuradas.
 
 ## Testes
 
@@ -123,18 +123,18 @@ Rodar testes com cobertura:
 python -m pytest --cov=app
 ```
 
-Os testes usam banco SQLite isolado e nao dependem de Redis real nem de APIs externas.
+Os testes usam banco SQLite isolado e não dependem de Redis real nem de APIs externas.
 
-## Autenticacao
+## Autenticação
 
 A API usa JWT Bearer Token.
 
 Perfis:
 
-- `USER`: pode consultar veiculos e relatorios.
-- `ADMIN`: pode consultar, criar, atualizar e remover veiculos.
+- `USER`: pode consultar veículos e relatórios.
+- `ADMIN`: pode consultar, criar, atualizar e remover veículos.
 
-Para ambiente local/teste, crie um usuario inicial:
+Para ambiente local/teste, crie um usuário inicial:
 
 ```http
 POST /auth/bootstrap
@@ -173,12 +173,12 @@ Bearer <access_token>
 
 ## Endpoints Principais
 
-Autenticacao:
+Autenticação:
 
 - `POST /auth/login`
 - `POST /auth/bootstrap`
 
-Veiculos:
+Veículos:
 
 - `GET /veiculos`
 - `GET /veiculos/{id}`
@@ -188,19 +188,19 @@ Veiculos:
 - `DELETE /veiculos/{id}`
 - `GET /veiculos/relatorios/por-marca`
 
-Utilitario:
+Utilitário:
 
 - `GET /health`
 
-## Decisoes Tecnicas
+## Decisões Técnicas
 
-- A aplicacao foi organizada em camadas: controllers, services, repositories, schemas, models e database.
-- Controllers recebem requisicoes HTTP e delegam regras para services.
-- Services concentram regras de negocio, como validacao de placa duplicada, soft delete e conversao BRL para USD.
+- A aplicação foi organizada em camadas: controllers, services, repositories, schemas, models e database.
+- Controllers recebem requisições HTTP e delegam regras para services.
+- Services concentram regras de negócio, como validação de placa duplicada, soft delete e conversão BRL para USD.
 - Repositories concentram acesso ao banco via SQLAlchemy ORM.
-- Veiculos usam soft delete com o campo `ativo`, evitando remocao fisica do banco.
-- A cotacao USD/BRL usa Redis como cache com TTL configuravel.
-- Caso Redis falhe, a aplicacao segue funcionando e busca a cotacao nas APIs externas.
+- Veículos usam soft delete com o campo `ativo`, evitando remoção física do banco.
+- A cotação USD/BRL usa Redis como cache com TTL configurável.
+- Caso Redis falhe, a aplicação segue funcionando e busca a cotação nas APIs externas.
 - Erros seguem formato padronizado:
 
 ```json
@@ -214,7 +214,7 @@ Utilitario:
 ## Melhorias Futuras
 
 - Configurar migrations com Alembic.
-- Remover ou proteger melhor o endpoint `/auth/bootstrap` em ambientes nao locais.
-- Adicionar testes especificos para cache Redis e fallback de cotacao.
+- Remover ou proteger melhor o endpoint `/auth/bootstrap` em ambientes não locais.
+- Adicionar testes específicos para cache Redis e fallback de cotação.
 - Criar pipeline CI para rodar testes e cobertura automaticamente.
 - Evoluir logs estruturados e observabilidade.
