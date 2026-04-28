@@ -1,10 +1,10 @@
 from typing import Literal
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from app.core.errors import unauthorized_error
+from app.core.errors import conflict_error, unauthorized_error
 from app.core.security import create_access_token, hash_password, verify_password
 from app.database.session import get_db
 from app.repositories import user_repository
@@ -47,13 +47,7 @@ def bootstrap_user(
     # Development/test helper only. Do not expose this endpoint in production.
     existing_user = user_repository.get_by_email(db, data.email)
     if existing_user:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail={
-                "message": "A user with this email already exists.",
-                "code": "USER_EMAIL_CONFLICT",
-            },
-        )
+        raise conflict_error("A user with this email already exists.")
 
     user = user_repository.create_user(
         db=db,

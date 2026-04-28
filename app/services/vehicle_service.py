@@ -1,8 +1,8 @@
 from typing import Any
 
-from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.core.errors import bad_request_error, conflict_error, not_found_error
 from app.models.vehicle import Vehicle
 from app.repositories import vehicle_repository
 from app.services.exchange_service import get_usd_to_brl
@@ -15,7 +15,7 @@ def create_vehicle(db: Session, data: Any) -> Vehicle:
 
     existing_vehicle = vehicle_repository.get_by_plate(db, vehicle_data["placa"])
     if existing_vehicle:
-        raise _conflict_error("A vehicle with this plate already exists.")
+        raise conflict_error("A vehicle with this plate already exists.")
 
     vehicle_data["preco"] = _convert_brl_to_usd(vehicle_data["preco"])
 
@@ -28,11 +28,11 @@ def update_vehicle(db: Session, vehicle_id: int, data: Any) -> Vehicle:
 
     missing_fields = REQUIRED_VEHICLE_FIELDS - update_data.keys()
     if missing_fields:
-        raise _bad_request_error("PUT requires all vehicle fields.")
+        raise bad_request_error("PUT requires all vehicle fields.")
 
     empty_fields = [field for field in REQUIRED_VEHICLE_FIELDS if update_data[field] is None]
     if empty_fields:
-        raise _bad_request_error("PUT fields cannot be null.")
+        raise bad_request_error("PUT fields cannot be null.")
 
     _ensure_unique_plate(db, update_data["placa"], vehicle.id)
 
@@ -58,7 +58,7 @@ def get_vehicle(db: Session, vehicle_id: int) -> Vehicle:
     vehicle = vehicle_repository.get_by_id(db, vehicle_id)
 
     if vehicle is None or not vehicle.ativo:
-        raise _not_found_error("Vehicle not found.")
+        raise not_found_error("Vehicle not found.")
 
     return vehicle
 
@@ -80,7 +80,7 @@ def _ensure_unique_plate(db: Session, placa: str, current_vehicle_id: int) -> No
     existing_vehicle = vehicle_repository.get_by_plate(db, placa)
 
     if existing_vehicle and existing_vehicle.id != current_vehicle_id:
-        raise _conflict_error("A vehicle with this plate already exists.")
+        raise conflict_error("A vehicle with this plate already exists.")
 
 
 def _convert_brl_to_usd(price_brl: float) -> float:
@@ -96,24 +96,3 @@ def _to_dict(data: Any, exclude_unset: bool = False) -> dict[str, Any]:
         return data.copy()
 
     return dict(data)
-
-
-def _bad_request_error(message: str) -> HTTPException:
-    return HTTPException(
-        status_code=status.HTTP_400_BAD_REQUEST,
-        detail={"message": message, "code": "BAD_REQUEST"},
-    )
-
-
-def _not_found_error(message: str) -> HTTPException:
-    return HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail={"message": message, "code": "VEHICLE_NOT_FOUND"},
-    )
-
-
-def _conflict_error(message: str) -> HTTPException:
-    return HTTPException(
-        status_code=status.HTTP_409_CONFLICT,
-        detail={"message": message, "code": "VEHICLE_PLATE_CONFLICT"},
-    )
