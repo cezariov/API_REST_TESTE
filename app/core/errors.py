@@ -6,13 +6,15 @@ from starlette.exceptions import HTTPException
 
 from app.schemas.error import ErrorResponse
 
+HTTP_422_UNPROCESSABLE_ENTITY = 422
+
 ERROR_CODES = {
     status.HTTP_400_BAD_REQUEST: "bad_request",
     status.HTTP_401_UNAUTHORIZED: "unauthorized",
     status.HTTP_403_FORBIDDEN: "forbidden",
     status.HTTP_404_NOT_FOUND: "not_found",
     status.HTTP_409_CONFLICT: "conflict",
-    status.HTTP_422_UNPROCESSABLE_ENTITY: "validation_error",
+    HTTP_422_UNPROCESSABLE_ENTITY: "validation_error",
     status.HTTP_500_INTERNAL_SERVER_ERROR: "internal_error",
     status.HTTP_503_SERVICE_UNAVAILABLE: "service_unavailable",
 }
@@ -23,7 +25,7 @@ DEFAULT_MESSAGES = {
     status.HTTP_403_FORBIDDEN: "Forbidden.",
     status.HTTP_404_NOT_FOUND: "Resource not found.",
     status.HTTP_409_CONFLICT: "Conflict.",
-    status.HTTP_422_UNPROCESSABLE_ENTITY: "Validation error.",
+    HTTP_422_UNPROCESSABLE_ENTITY: "Validation error.",
     status.HTTP_500_INTERNAL_SERVER_ERROR: "Internal server error.",
     status.HTTP_503_SERVICE_UNAVAILABLE: "Service unavailable.",
 }
@@ -82,10 +84,10 @@ async def validation_exception_handler(
     exc: RequestValidationError,
 ) -> JSONResponse:
     return JSONResponse(
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        status_code=HTTP_422_UNPROCESSABLE_ENTITY,
         content=_error_content(
             message="Validation error.",
-            code=ERROR_CODES[status.HTTP_422_UNPROCESSABLE_ENTITY],
+            code=ERROR_CODES[HTTP_422_UNPROCESSABLE_ENTITY],
             details=jsonable_encoder(exc.errors()),
         ),
     )
