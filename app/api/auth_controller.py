@@ -9,6 +9,7 @@ from app.core.security import create_access_token, hash_password, verify_passwor
 from app.database.session import get_db
 from app.repositories import user_repository
 from app.schemas.auth import LoginRequest, Token
+from app.schemas.error import ErrorResponse
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -19,7 +20,32 @@ class BootstrapUserRequest(BaseModel):
     role: Literal["USER", "ADMIN"] = "USER"
 
 
-@router.post("/login", response_model=Token, status_code=status.HTTP_200_OK)
+class BootstrapUserResponse(BaseModel):
+    id: int
+    email: str
+    role: str
+
+
+ERROR_RESPONSES = {
+    401: {"model": ErrorResponse, "description": "Credenciais inválidas."},
+    409: {"model": ErrorResponse, "description": "Conflito de dados."},
+    422: {"model": ErrorResponse, "description": "Erro de validação."},
+    500: {"model": ErrorResponse, "description": "Erro interno."},
+}
+
+
+@router.post(
+    "/login",
+    response_model=Token,
+    status_code=status.HTTP_200_OK,
+    summary="Autenticar usuário",
+    description="Valida email e senha de um usuário ativo e retorna um token JWT Bearer.",
+    responses={
+        401: ERROR_RESPONSES[401],
+        422: ERROR_RESPONSES[422],
+        500: ERROR_RESPONSES[500],
+    },
+)
 def login(data: LoginRequest, db: Session = Depends(get_db)) -> Token:
     user = user_repository.get_by_email(db, data.email)
 
@@ -39,11 +65,33 @@ def login(data: LoginRequest, db: Session = Depends(get_db)) -> Token:
     return Token(access_token=access_token, token_type="bearer")
 
 
-@router.post("/bootstrap", status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/bootstrap",
+    response_model=BootstrapUserResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Criar usuário inicial",
+    description=(
+        "Cria usuários USER ou ADMIN para desenvolvimento/teste. "
+        "Este endpoint não deve ser exposto em produção."
+    ),
+    responses={
+        201: {
+            "description": "Usuário criado com sucesso.",
+            "content": {
+                "application/json": {
+                    "example": {"id": 1, "email": "admin@example.com", "role": "ADMIN"}
+                }
+            },
+        },
+        409: ERROR_RESPONSES[409],
+        422: ERROR_RESPONSES[422],
+        500: ERROR_RESPONSES[500],
+    },
+)
 def bootstrap_user(
     data: BootstrapUserRequest,
     db: Session = Depends(get_db),
-) -> dict[str, int | str]:
+) -> BootstrapUserResponse:
     # Development/test helper only. Do not expose this endpoint in production.
     existing_user = user_repository.get_by_email(db, data.email)
     if existing_user:
@@ -56,4 +104,4 @@ def bootstrap_user(
         role=data.role,
     )
 
-    return {"id": user.id, "email": user.email, "role": user.role}
+    return BootstrapUserResponse(id=user.id, email=user.email, role=user.role)
