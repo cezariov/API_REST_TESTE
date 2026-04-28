@@ -32,6 +32,18 @@ Opcionalmente, crie um arquivo `.env` a partir do exemplo:
 copy .env.example .env
 ```
 
+Variaveis principais:
+
+```env
+PROJECT_NAME="Vehicle Management API"
+DATABASE_URL="sqlite:///./app.db"
+JWT_SECRET_KEY="local-development-jwt-secret-key-change-before-production"
+JWT_ALGORITHM="HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+```
+
+Por padrao, o projeto usa SQLite local em `app.db`.
+
 ## Execucao local
 
 ```bash
