@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.models.vehicle import Vehicle
@@ -60,6 +60,20 @@ def list_vehicles(
     statement = statement.offset(skip).limit(limit)
 
     return list(db.scalars(statement).all())
+
+
+def count_active_by_brand(db: Session) -> list[dict[str, Any]]:
+    statement = (
+        select(Vehicle.marca, func.count(Vehicle.id))
+        .where(Vehicle.ativo.is_(True))
+        .group_by(Vehicle.marca)
+        .order_by(Vehicle.marca)
+    )
+
+    return [
+        {"marca": marca, "quantidade": quantidade}
+        for marca, quantidade in db.execute(statement).all()
+    ]
 
 
 def update_vehicle(db: Session, vehicle: Vehicle, data: Any) -> Vehicle:

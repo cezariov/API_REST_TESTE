@@ -72,6 +72,10 @@ def list_vehicles(
     return vehicle_repository.list_vehicles(db, filters, skip, limit)
 
 
+def count_active_by_brand(db: Session) -> list[dict[str, Any]]:
+    return vehicle_repository.count_active_by_brand(db)
+
+
 def _ensure_unique_plate(db: Session, placa: str, current_vehicle_id: int) -> None:
     existing_vehicle = vehicle_repository.get_by_plate(db, placa)
 
